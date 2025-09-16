@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Manice Commands</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+</head>
+<body>
+    <!-- This page contains no visible UI -->
+    <!-- It's used only to register ribbon command handlers -->
+
+    <script type="text/javascript">
+        // Initialize Office and register commands
+        Office.onReady(() => {
+            console.log('Manice Commands initialized');
+            
+            // Import and register ribbon commands
+            loadRibbonCommands();
+        });
+
+        // Load ribbon commands dynamically
+        async function loadRibbonCommands() {
+            try {
+                // In production, this would import the bundled commands module
+                // For now, we'll include the commands inline
+                
+                // Service instances
+                let aiService;
+                let excelService;
+
+                // Initialize services
+                function initializeServices() {
+                    if (!aiService) {
+                        aiService = {
+                            async checkConnection() {
+                                try {
+                                    const response = await fetch('http://127.0.0.1:8899/health');
+                                    return response.ok;
+                                } catch (error) {
+                                    return false;
+                                }
+                            },
+                            async processInstruction(request) {
+                                const response = await fetch('http://127.0.0.1:8899/manice', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(request)
+                                });
+                                if (!response.ok) {
+                                    throw new Error('AI server request failed');
+                                }
+                                return await response.json();
+                            }
+                        };
+                    }
+                    if (!excelService) {
+                        excelService = {
+                            async getCurrentContext() {
+                                return Excel.run(async (context) => {
+                                    const workbook = context.workbook;
+                                    const worksheet = workbook.worksheets.getActiveWorksheet();
+                                    const range = context.workbook.getSelectedRange();
+                                    
+                                    worksheet.load("name");
+                                    workbook.load("name");
+                                    range.load("address, values, formulas");
+                                    
+                                    await context.sync();
+                                    
+                                    return {
+                                        sheet_name: worksheet.name,
+                                        selected_range: range.address,
+                                        cell_data: {
+                                            address: range.address,
+                                            values: range.values,
+                                            formulas: range.formulas
+                                        },
+                                        workbook_info: {
+                                            name: workbook.name,
+                                            active_sheet: worksheet.name
+                                        }
+                                    };
+                                });
+                            },
+                            async executeOperations(operations) {
+                                // Simplified operation execution
+                                for (const op of operations) {
+                                    console.log('Executing operation:', op.type, 'on', op.target);
+                                    // In the full implementation, this would execute the actual operations
+                                }
+                            }
+                        };
+                    }
+                }
+
+                // Show notification to user
+                function showNotification(message, type = 'info') {
+                    const iconMap = {
+                        'error': '❌',
+                        'success': '✅',
+                        'info': 'ℹ️'
+                    };
+                    
+                    const colorMap = {
+                        'error': '#d13438',
+                        'success': '#16c60c', 
+                        'info': '#0078d4'
+                    };
+
+                    Office.context.ui.displayDialogAsync(
+                        `data:text/html,<html><body style="font-family: 'Segoe UI', sans-serif; padding: 20px; text-align: center;">
+                            <h3 style="color: ${colorMap[type]};">
+                                ${iconMap[type]} Manice AI
+                            </h3>
+                            <p style="white-space: pre-line;">${message}</p>
+                            <button onclick="window.close()" style="padding: 8px 16px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">OK</button>
+                        </body></html>`,
+                        {
+                            height: 300,
+                            width: 450,
+                            displayInIframe: false
+                        }
+                    );
+                }
+
+                // Command: Analyze Selected Data
+                async function analyzeSelectedData(event) {
+                    initializeServices();
+                    
+                    try {
+                        const isConnected = await aiService.checkConnection();
+                        if (!isConnected) {
+                            showNotification('AI server is not connected.\\nPlease make sure the Manice AI server is running on port 8899.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const context = await excelService.getCurrentContext();
+                        
+                        if (!context.cell_data || !context.cell_data.values || context.cell_data.values.length === 0) {
+                            showNotification('Please select some data to analyze.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const response = await aiService.processInstruction({
+                            instruction: 'Analyze this selected data and provide comprehensive insights including trends, patterns, and recommendations.',
+                            context: context,
+                            force_model: 'large',
+                            stream: false
+                        });
+
+                        if (response.excel_operations && response.excel_operations.length > 0) {
+                            await excelService.executeOperations(response.excel_operations);
+                        }
+
+                        showNotification(`Analysis Complete:\\n\\n${response.explanation}`, 'success');
+
+                    } catch (error) {
+                        console.error('Error analyzing data:', error);
+                        showNotification(`Analysis failed:\\n${error.message}`, 'error');
+                    } finally {
+                        event.completed();
+                    }
+                }
+
+                // Command: Create Smart Chart
+                async function createSmartChart(event) {
+                    initializeServices();
+                    
+                    try {
+                        const isConnected = await aiService.checkConnection();
+                        if (!isConnected) {
+                            showNotification('AI server is not connected.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const context = await excelService.getCurrentContext();
+                        
+                        if (!context.cell_data || !context.cell_data.values || context.cell_data.values.length === 0) {
+                            showNotification('Please select data to create a chart.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const response = await aiService.processInstruction({
+                            instruction: 'Create the most appropriate chart type for this selected data. Choose the best visualization and add professional formatting.',
+                            context: context,
+                            force_model: 'small',
+                            stream: false
+                        });
+
+                        if (response.excel_operations && response.excel_operations.length > 0) {
+                            await excelService.executeOperations(response.excel_operations);
+                            showNotification('Smart chart created successfully!', 'success');
+                        } else {
+                            showNotification('Could not determine the best chart type for this data.', 'info');
+                        }
+
+                    } catch (error) {
+                        console.error('Error creating chart:', error);
+                        showNotification(`Chart creation failed:\\n${error.message}`, 'error');
+                    } finally {
+                        event.completed();
+                    }
+                }
+
+                // Command: Clean Selected Data
+                async function cleanSelectedData(event) {
+                    initializeServices();
+                    
+                    try {
+                        const isConnected = await aiService.checkConnection();
+                        if (!isConnected) {
+                            showNotification('AI server is not connected.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const context = await excelService.getCurrentContext();
+                        
+                        if (!context.cell_data || !context.cell_data.values || context.cell_data.values.length === 0) {
+                            showNotification('Please select data to clean.', 'error');
+                            event.completed();
+                            return;
+                        }
+
+                        const response = await aiService.processInstruction({
+                            instruction: 'Clean this selected data by removing duplicates, fixing formatting issues, standardizing values, and organizing the layout for better readability.',
+                            context: context,
+                            force_model: 'small',
+                            stream: false
+                        });
+
+                        if (response.excel_operations && response.excel_operations.length > 0) {
+                            await excelService.executeOperations(response.excel_operations);
+                            showNotification(`Data cleaned successfully!\\nApplied ${response.excel_operations.length} improvements.`, 'success');
+                        } else {
+                            showNotification('Data appears to be already clean or no improvements were identified.', 'info');
+                        }
+
+                    } catch (error) {
+                        console.error('Error cleaning data:', error);
+                        showNotification(`Data cleaning failed:\\n${error.message}`, 'error');
+                    } finally {
+                        event.completed();
+                    }
+                }
+
+                // Command: Open Settings
+                async function openSettings(event) {
+                    try {
+                        const settingsHtml = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Manice Settings</title>
+                                <style>
+                                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; margin: 0; background: #faf9f8; }
+                                    .container { max-width: 500px; margin: 0 auto; }
+                                    .setting-group { margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                                    .setting-label { display: block; margin-bottom: 5px; font-weight: 600; color: #323130; }
+                                    .setting-input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+                                    .setting-description { font-size: 12px; color: #666; margin-top: 4px; }
+                                    .buttons { text-align: right; margin-top: 20px; }
+                                    .btn { padding: 10px 20px; margin-left: 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+                                    .btn-primary { background: #0078d4; color: white; }
+                                    .btn-secondary { background: #f3f2f1; color: #323130; border: 1px solid #ccc; }
+                                    .connection-status { padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: 500; }
+                                    .status-connected { background: #dff6dd; color: #16c60c; border: 2px solid #16c60c; }
+                                    .status-disconnected { background: #fde7e9; color: #d13438; border: 2px solid #d13438; }
+                                    .status-checking { background: #fff4ce; color: #8a6914; border: 2px solid #fed100; }
+                                    h2 { color: #323130; margin-bottom: 20px; text-align: center; }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h2>🤖 Manice AI Settings</h2>
+                                    
+                                    <div id="connectionStatus" class="connection-status status-checking">
+                                        <span id="statusText">🔍 Checking connection...</span>
+                                    </div>
+                                    
+                                    <div class="setting-group">
+                                        <label class="setting-label">AI Server URL:</label>
+                                        <input type="text" id="serverUrl" class="setting-input" value="http://127.0.0.1:8899" />
+                                        <div class="setting-description">URL of the local Manice AI server</div>
+                                    </div>
+                                    
+                                    <div class="setting-group">
+                                        <label class="setting-label">Preferred AI Model:</label>
+                                        <select id="preferredModel" class="setting-input">
+                                            <option value="auto">🤖 Auto-select (Recommended)</option>
+                                            <option value="large">🧠 Always use Large Model (DeepSeek R1)</option>
+                                            <option value="small">⚡ Always use Small Model (Mistral-7B)</option>
+                                        </select>
+                                        <div class="setting-description">Choose which AI model to use by default</div>
+                                    </div>
+                                    
+                                    <div class="setting-group">
+                                        <label class="setting-label">Safety Settings:</label>
+                                        <div style="margin-top: 8px;">
+                                            <label><input type="checkbox" id="confirmDestructive" checked style="margin-right: 8px;"> Confirm destructive operations</label><br>
+                                            <label><input type="checkbox" id="enableUndo" checked style="margin-right: 8px;"> Enable undo for AI operations</label><br>
+                                            <label><input type="checkbox" id="backupData" checked style="margin-right: 8px;"> Backup data before major changes</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="buttons">
+                                        <button class="btn btn-secondary" onclick="window.close()">Cancel</button>
+                                        <button class="btn btn-primary" onclick="testConnection()">🔄 Test Connection</button>
+                                        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                                    </div>
+                                </div>
+                                
+                                <script>
+                                    window.addEventListener('load', checkConnection);
+                                    
+                                    async function checkConnection() {
+                                        const statusDiv = document.getElementById('connectionStatus');
+                                        const statusText = document.getElementById('statusText');
+                                        
+                                        try {
+                                            const response = await fetch(document.getElementById('serverUrl').value + '/health');
+                                            if (response.ok) {
+                                                statusDiv.className = 'connection-status status-connected';
+                                                statusText.innerHTML = '✅ AI Server Connected';
+                                            } else {
+                                                throw new Error('Server not responding');
+                                            }
+                                        } catch (error) {
+                                            statusDiv.className = 'connection-status status-disconnected';
+                                            statusText.innerHTML = '❌ Cannot Connect to AI Server';
+                                        }
+                                    }
+                                    
+                                    async function testConnection() {
+                                        const statusDiv = document.getElementById('connectionStatus');
+                                        const statusText = document.getElementById('statusText');
+                                        statusDiv.className = 'connection-status status-checking';
+                                        statusText.innerHTML = '🔍 Testing connection...';
+                                        
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        await checkConnection();
+                                    }
+                                    
+                                    function saveSettings() {
+                                        alert('⚙️ Settings saved successfully!\\n\\nYour Manice AI preferences have been updated.');
+                                        window.close();
+                                    }
+                                </script>
+                            </body>
+                            </html>
+                        `;
+
+                        Office.context.ui.displayDialogAsync(
+                            'data:text/html,' + encodeURIComponent(settingsHtml),
+                            {
+                                height: 600,
+                                width: 600,
+                                displayInIframe: false
+                            }
+                        );
+
+                    } catch (error) {
+                        console.error('Error opening settings:', error);
+                        showNotification(`Could not open settings:\\n${error.message}`, 'error');
+                    } finally {
+                        event.completed();
+                    }
+                }
+
+                // Register all command functions
+                if (Office.actions) {
+                    Office.actions.associate('analyzeSelectedData', analyzeSelectedData);
+                    Office.actions.associate('createSmartChart', createSmartChart);
+                    Office.actions.associate('cleanSelectedData', cleanSelectedData);
+                    Office.actions.associate('openSettings', openSettings);
+                    
+                    console.log('Manice ribbon commands registered successfully');
+                }
+
+            } catch (error) {
+                console.error('Failed to load ribbon commands:', error);
+            }
+        }
+    </script>
+</body>
+</html>

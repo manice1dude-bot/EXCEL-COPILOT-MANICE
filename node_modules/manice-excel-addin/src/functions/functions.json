@@ -1,0 +1,147 @@
+{
+  "functions": [
+    {
+      "description": "Manice AI CoPilot - Execute natural language instructions on Excel data",
+      "id": "MANICE",
+      "name": "MANICE",
+      "parameters": [
+        {
+          "description": "Natural language instruction for AI to execute",
+          "name": "instruction",
+          "type": "string"
+        },
+        {
+          "description": "Optional: Force specific AI model (large/small)",
+          "name": "model",
+          "type": "string",
+          "optional": true
+        },
+        {
+          "description": "Optional: Target range for operation (default: current selection)",
+          "name": "range", 
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "any",
+        "description": "AI-generated result based on instruction"
+      }
+    },
+    {
+      "description": "Analyze selected data with AI insights",
+      "id": "MANICE_ANALYZE",
+      "name": "MANICE.ANALYZE", 
+      "parameters": [
+        {
+          "description": "Data range to analyze",
+          "name": "range",
+          "type": "any[][]"
+        },
+        {
+          "description": "Type of analysis (summary, trends, insights, forecast)",
+          "name": "analysisType",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "string",
+        "description": "AI analysis results"
+      }
+    },
+    {
+      "description": "Generate Excel formula from natural language description",
+      "id": "MANICE_FORMULA",
+      "name": "MANICE.FORMULA",
+      "parameters": [
+        {
+          "description": "Natural language description of desired formula",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "description": "Optional: Reference cell/range context",
+          "name": "context",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "string", 
+        "description": "Generated Excel formula"
+      }
+    },
+    {
+      "description": "Clean and format data using AI",
+      "id": "MANICE_CLEAN",
+      "name": "MANICE.CLEAN",
+      "parameters": [
+        {
+          "description": "Data range to clean",
+          "name": "range",
+          "type": "any[][]"
+        },
+        {
+          "description": "Cleaning instructions (remove duplicates, fix formatting, etc.)",
+          "name": "cleaningType",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "any[][]",
+        "description": "Cleaned data array"
+      }
+    },
+    {
+      "description": "Predict or forecast values using AI",
+      "id": "MANICE_PREDICT",
+      "name": "MANICE.PREDICT",
+      "parameters": [
+        {
+          "description": "Historical data range for prediction",
+          "name": "historicalData",
+          "type": "any[][]"
+        },
+        {
+          "description": "Number of periods to predict",
+          "name": "periods",
+          "type": "number"
+        },
+        {
+          "description": "Prediction method (linear, exponential, seasonal)",
+          "name": "method",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "any[]",
+        "description": "Predicted values array"
+      }
+    },
+    {
+      "description": "Generate business insights from data",
+      "id": "MANICE_INSIGHTS",
+      "name": "MANICE.INSIGHTS",
+      "parameters": [
+        {
+          "description": "Data range to analyze for insights",
+          "name": "range",
+          "type": "any[][]"
+        },
+        {
+          "description": "Business context (sales, finance, marketing, etc.)",
+          "name": "context",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "string",
+        "description": "Business insights and recommendations"
+      }
+    }
+  ]
+}

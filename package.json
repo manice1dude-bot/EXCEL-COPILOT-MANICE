@@ -1,0 +1,68 @@
+{
+  "name": "manice-excel-ai-copilot",
+  "version": "1.0.0",
+  "description": "Fully offline Excel AI CoPilot with real-time editing capabilities",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd ai-server && pip install -r requirements.txt && cd ../excel-addin && npm install",
+    "build:server": "cd ai-server && python setup.py build",
+    "build:addin": "cd excel-addin && npm run build",
+    "build:all": "npm run build:server && npm run build:addin",
+    "start:server": "cd ai-server && python server.py",
+    "start:dev": "concurrently \"npm run start:server\" \"cd excel-addin && npm run start\"",
+    "test": "jest",
+    "test:integration": "cd tests && python -m pytest integration/",
+    "test:excel": "cd tests && npm run test:excel",
+    "lint": "eslint . --ext .js,.ts,.tsx",
+    "format": "prettier --write .",
+    "setup:models": "cd models-config && ./setup-models.bat",
+    "clean": "rimraf dist build node_modules ai-server/__pycache__ excel-addin/dist",
+    "install-addin": "cd excel-addin && npm run install-addin"
+  },
+  "keywords": [
+    "excel",
+    "ai",
+    "copilot",
+    "offline",
+    "deepseek",
+    "mistral",
+    "automation",
+    "spreadsheet"
+  ],
+  "author": "Manice Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manice-ai/excel-copilot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manice-ai/excel-copilot/issues"
+  },
+  "homepage": "https://github.com/manice-ai/excel-copilot#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "@types/node": "^20.6.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "concurrently": "^8.2.1",
+    "eslint": "^8.49.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "winston": "^3.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "excel-addin",
+    "shared-utils"
+  ]
+}

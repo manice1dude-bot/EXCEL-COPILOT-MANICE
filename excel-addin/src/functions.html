@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Manice Custom Functions</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+</head>
+<body>
+    <!-- This page hosts Manice custom functions -->
+    <!-- No visible UI is needed -->
+
+    <script type="text/javascript">
+        // Initialize Office and custom functions
+        Office.onReady(() => {
+            console.log('Manice Custom Functions runtime initialized');
+            
+            // The functions will be loaded by webpack
+            // and registered automatically
+        });
+
+        // Global error handler for custom functions
+        window.addEventListener('error', (event) => {
+            console.error('Custom Functions Error:', event.error);
+        });
+
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection in custom functions:', event.reason);
+        });
+    </script>
+</body>
+</html>

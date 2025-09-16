@@ -1,0 +1,106 @@
+{
+  "providers": {
+    "ollama": {
+      "url": "http://localhost:11434",
+      "available": false,
+      "models": [],
+      "api_format": "ollama",
+      "timeout": 30
+    },
+    "lmstudio": {
+      "url": "http://localhost:1234",
+      "available": false,
+      "models": [],
+      "api_format": "openai",
+      "timeout": 30
+    }
+  },
+  "models": {
+    "deepseek-r1:latest": {
+      "provider": "ollama",
+      "url": "http://localhost:11434",
+      "type": "reasoning",
+      "capabilities": [
+        "complex_reasoning",
+        "mathematical_calculations",
+        "code_generation",
+        "problem_solving"
+      ],
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    "mistral:7b-instruct": {
+      "provider": "ollama", 
+      "url": "http://localhost:11434",
+      "type": "instruct",
+      "capabilities": [
+        "text_generation",
+        "simple_tasks",
+        "formatting",
+        "quick_responses"
+      ],
+      "max_tokens": 2048,
+      "temperature": 0.5
+    }
+  },
+  "routing": {
+    "complex_tasks": [
+      "deepseek-r1:latest"
+    ],
+    "simple_tasks": [
+      "mistral:7b-instruct"
+    ],
+    "fallback": "mistral:7b-instruct",
+    "task_classification": {
+      "formula_generation": "complex_tasks",
+      "formula_debugging": "complex_tasks",
+      "vba_generation": "complex_tasks",
+      "data_analysis": "complex_tasks",
+      "chart_creation": "simple_tasks",
+      "formatting": "simple_tasks",
+      "simple_queries": "simple_tasks"
+    }
+  },
+  "performance": {
+    "max_concurrent_requests": 5,
+    "request_timeout": 60,
+    "retry_attempts": 3,
+    "cache_enabled": true,
+    "cache_ttl": 300
+  },
+  "features": {
+    "formula_engine": {
+      "enabled": true,
+      "preferred_model": "deepseek-r1:latest",
+      "fallback_model": "mistral:7b-instruct"
+    },
+    "vba_engine": {
+      "enabled": true,
+      "preferred_model": "deepseek-r1:latest",
+      "security_checks": true
+    },
+    "chat_assistant": {
+      "enabled": true,
+      "preferred_model": "mistral:7b-instruct",
+      "context_length": 10
+    }
+  },
+  "security": {
+    "enable_request_validation": true,
+    "max_request_size": 10240,
+    "allowed_origins": [
+      "https://localhost",
+      "https://excel.officeapps.live.com",
+      "https://excel-online.office.com"
+    ],
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 60
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "enable_request_logging": true,
+    "enable_model_metrics": true
+  }
+}

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
+           xsi:type="TaskPaneApp">
+
+  <!-- Basic Settings -->
+  <Id>12345678-1234-1234-1234-123456789abc</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Manice Development Team</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Manice - Excel AI CoPilot"/>
+  <Description DefaultValue="Fully offline Excel AI assistant with real-time editing capabilities powered by DeepSeek R1 and Mistral-7B"/>
+  <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
+  <SupportUrl DefaultValue="https://github.com/manice-ai/excel-copilot/issues"/>
+  
+  <!-- App Domain -->
+  <AppDomains>
+    <AppDomain>https://localhost:3000</AppDomain>
+  </AppDomains>
+  
+  <!-- Hosts -->
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+  
+  <!-- Default Settings -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+  </DefaultSettings>
+  
+  <!-- Permissions -->
+  <Permissions>ReadWriteDocument</Permissions>
+  
+  <!-- Version Overrides -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    
+    <!-- Hosts -->
+    <Hosts>
+      <Host xsi:type="Workbook">
+        
+        <!-- Runtime for Custom Functions -->
+        <Runtimes>
+          <Runtime resid="ManiceCustomFunctions.Url" lifetime="long" />
+        </Runtimes>
+        
+        <!-- All Form Factors -->
+        <AllFormFactors>
+          <!-- Extension Point: Custom Functions -->
+          <ExtensionPoint xsi:type="CustomFunctions">
+            <Script>
+              <SourceLocation resid="ManiceCustomFunctions.Url"/>
+            </Script>
+            <Page>
+              <SourceLocation resid="ManiceCustomFunctions.Url"/>
+            </Page>
+            <Metadata>
+              <SourceLocation resid="ManiceFunctions.Metadata"/>
+            </Metadata>
+            <Namespace resid="ManiceFunctions.Namespace"/>
+          </ExtensionPoint>
+        </AllFormFactors>
+        
+        <!-- Desktop Form Factor -->
+        <DesktopFormFactor>
+          <!-- Get Started -->
+          <GetStarted>
+            <Title resid="ManiceAddin.GetStartedTitle"/>
+            <Description resid="ManiceAddin.GetStartedDescription"/>
+            <LearnMoreUrl resid="ManiceAddin.GetStartedLearnMoreUrl"/>
+          </GetStarted>
+          
+          <!-- Function File for Ribbon Commands -->
+          <FunctionFile resid="Commands.Url"/>
+          
+          <!-- Extension Point: Primary Command Surface (Ribbon) -->
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!-- Manice Tab -->
+            <OfficeTab id="ManiceTab">
+              <Label resid="ManiceTab.Label"/>
+              
+              <!-- AI Assistant Group -->
+              <Group id="AIAssistantGroup">
+                <Label resid="AIAssistantGroup.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                
+                <!-- Open Sidebar Button -->
+                <Control xsi:type="Button" id="TaskPaneButton">
+                  <Label resid="TaskPaneButton.Label"/>
+                  <Supertip>
+                    <Title resid="TaskPaneButton.Label"/>
+                    <Description resid="TaskPaneButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+                
+                <!-- Quick Actions Dropdown -->
+                <Control xsi:type="Menu" id="QuickActionsMenu">
+                  <Label resid="QuickActionsMenu.Label"/>
+                  <Supertip>
+                    <Title resid="QuickActionsMenu.Label"/>
+                    <Description resid="QuickActionsMenu.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Items>
+                    <Item id="AnalyzeDataAction">
+                      <Label resid="AnalyzeDataAction.Label"/>
+                      <Supertip>
+                        <Title resid="AnalyzeDataAction.Label"/>
+                        <Description resid="AnalyzeDataAction.Tooltip"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>analyzeSelectedData</FunctionName>
+                      </Action>
+                    </Item>
+                    <Item id="CreateChartAction">
+                      <Label resid="CreateChartAction.Label"/>
+                      <Supertip>
+                        <Title resid="CreateChartAction.Label"/>
+                        <Description resid="CreateChartAction.Tooltip"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>createSmartChart</FunctionName>
+                      </Action>
+                    </Item>
+                    <Item id="CleanDataAction">
+                      <Label resid="CleanDataAction.Label"/>
+                      <Supertip>
+                        <Title resid="CleanDataAction.Label"/>
+                        <Description resid="CleanDataAction.Tooltip"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ExecuteFunction">
+                        <FunctionName>cleanSelectedData</FunctionName>
+                      </Action>
+                    </Item>
+                  </Items>
+                </Control>
+                
+                <!-- Settings Button -->
+                <Control xsi:type="Button" id="SettingsButton">
+                  <Label resid="SettingsButton.Label"/>
+                  <Supertip>
+                    <Title resid="SettingsButton.Label"/>
+                    <Description resid="SettingsButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>openSettings</FunctionName>
+                  </Action>
+                </Control>
+                
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    
+    <!-- Resources -->
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
+        <bt:Url id="ManiceCustomFunctions.Url" DefaultValue="https://localhost:3000/functions.html"/>
+        <bt:Url id="ManiceFunctions.Metadata" DefaultValue="https://localhost:3000/functions.json"/>
+        <bt:Url id="ManiceAddin.GetStartedLearnMoreUrl" DefaultValue="https://github.com/manice-ai/excel-copilot"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="ManiceTab.Label" DefaultValue="Manice AI"/>
+        <bt:String id="AIAssistantGroup.Label" DefaultValue="AI Assistant"/>
+        <bt:String id="TaskPaneButton.Label" DefaultValue="Open Manice"/>
+        <bt:String id="QuickActionsMenu.Label" DefaultValue="Quick Actions"/>
+        <bt:String id="AnalyzeDataAction.Label" DefaultValue="Analyze Data"/>
+        <bt:String id="CreateChartAction.Label" DefaultValue="Create Chart"/>
+        <bt:String id="CleanDataAction.Label" DefaultValue="Clean Data"/>
+        <bt:String id="SettingsButton.Label" DefaultValue="Settings"/>
+        <bt:String id="ManiceFunctions.Namespace" DefaultValue="MANICE"/>
+        <bt:String id="ManiceAddin.GetStartedTitle" DefaultValue="Get started with Manice"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="TaskPaneButton.Tooltip" DefaultValue="Open the Manice AI assistant sidebar for conversational Excel help"/>
+        <bt:String id="QuickActionsMenu.Tooltip" DefaultValue="Quick AI-powered actions for common Excel tasks"/>
+        <bt:String id="AnalyzeDataAction.Tooltip" DefaultValue="Analyze selected data with AI insights"/>
+        <bt:String id="CreateChartAction.Tooltip" DefaultValue="Create intelligent charts from selected data"/>
+        <bt:String id="CleanDataAction.Tooltip" DefaultValue="Clean and format selected data using AI"/>
+        <bt:String id="SettingsButton.Tooltip" DefaultValue="Configure Manice AI settings and preferences"/>
+        <bt:String id="ManiceAddin.GetStartedDescription" DefaultValue="Your fully offline Excel AI assistant is ready! Use the =Manice() function or open the sidebar to get started."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
